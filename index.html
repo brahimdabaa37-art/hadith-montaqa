@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الكشافات الحديثية الذكية - المحدثة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة ذكاء اصطناعي برمجية لقراءة ملفات Excel مباشرة من المتصفح -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #1b4d3e;
+            --primary-light: #2c6e59;
+            --accent-color: #cda250;
+            --bg-color: #f7f9f6;
+            --card-bg: #ffffff;
+            --text-main: #2b2b2b;
+            --text-muted: #666666;
+            --color-sahih: #2e7d32;
+            --color-hassan: #ef6c00;
+            --color-daif: #c62828;
+            --color-muttafaq: #1565c0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.8;
+            padding-bottom: 50px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--accent-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        header h1 { font-family: 'Amiri', serif; font-size: 2.2rem; margin-bottom: 8px; }
+
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+
+        /* نافذة رفع وقراءة الملف الفوري */
+        .upload-zone {
+            background: #fff;
+            border: 2px dashed var(--primary-color);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-zone:hover { background: #f0f5f2; }
+        .upload-zone h3 { color: var(--primary-color); margin-bottom: 10px; }
+        
+        .btn-action {
+            background-color: var(--accent-color);
+            color: #111;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* لوحة الإحصائيات */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-right: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            text-align: center;
+        }
+
+        .stat-card .num { font-size: 1.6rem; font-weight: bold; color: var(--primary-color); }
+
+        /* صندوق البحث */
+        .search-box {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-wrapper { display: flex; gap: 15px; flex-wrap: wrap; }
+        .search-input { flex: 1; min-width: 300px; padding: 12px 18px; font-size: 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-family: 'Tajawal', sans-serif; }
+        .filter-select { padding: 0 15px; border: 2px solid #e2e8f0; border-radius: 8px; background: white; font-family: 'Tajawal', sans-serif; min-width: 180px; }
+
+        /* الأحاديث */
+        .hadith-list { display: flex; flex-direction: column; gap: 15px; }
+        .hadith-card { background: var(--card-bg); border-radius: 10px; padding: 22px; box-shadow: 0 3px 8px rgba(0,0,0,0.02); border: 1px solid #e8ede9; }
+        .hadith-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; }
+        .hadith-number { background: #eef3f0; color: var(--primary-color); padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .hadith-degree { padding: 3px 12px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; color: white; }
+        
+        .deg-sahih { background-color: var(--color-sahih); }
+        .deg-hassan { background-color: var(--color-hassan); }
+        .deg-daif { background-color: var(--color-daif); }
+        .deg-muttafaq { background-color: var(--color-muttafaq); }
+
+        .hadith-text { font-family: 'Amiri', serif; font-size: 1.4rem; color: var(--text-main); margin-bottom: 15px; text-align: justify; }
+        .hadith-text::before { content: "« "; color: var(--accent-color); }
+        .hadith-text::after { content: " »"; color: var(--accent-color); }
+
+        .hadith-meta-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; background: #fafbfa; padding: 12px; border-radius: 6px; font-size: 0.9rem; }
+        .meta-item strong { color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>مِنَصَّةُ الكَشَّافَاتِ الحَدِيثِيَّةِ الذَّكِيَّة</h1>
+        <p>مختبر الابتكار الرقمي - معالجة فورية لملفات الـ Excel الأصلية بدون وسيط</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- منطقة رفع وقراءة الملف المباشر -->
+        <div class="upload-zone" onclick="document.getElementById('excelFile').click()">
+            <h3>📂 اسحب أو اختر ملف الإكسيل الأصلي هنا للتشغيل الفوري</h3>
+            <p>قم باختيار ملف <strong style="color:var(--primary-color)">"الجامع - Copie.xlsx"</strong> وسيتم عرضه كاملاً في ثانية واحدة!</p>
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="display:none;" onchange="handleExcel(event)">
+            <button class="btn-action">اختيار الملف من جهازك</button>
+        </div>
+        
+        <!-- الإحصائيات الفورية -->
+        <div class="stats-panel">
+            <div class="stat-card"><h3>إجمالي أحاديث الملف</h3><div class="num" id="totalCount">0</div></div>
+            <div class="stat-card" style="border-right-color: var(--color-muttafaq)"><h3>متفق عليه</h3><div class="num" id="muttafaqCount">0</div></div>
+            <div class="stat-card" style="border-right-color: var(--color-sahih)"><h3>صحيح</h3><div class="num" id="sahihCount">0</div></div>
+            <div class="stat-card" style="border-right-color: var(--color-hassan)"><h3>حسن</h3><div class="num" id="hassanCount">0</div></div>
+            <div class="stat-card" style="border-right-color: var(--color-daif)"><h3>ضعيف / موقوف</h3><div class="num" id="daifCount">0</div></div>
+        </div>
+
+        <!-- محرك البحث والفلترة -->
+        <div class="search-box">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="ابحث بطرف الحديث، أوله، أو كلمة من النص...">
+                <select id="degreeFilter" class="filter-select">
+                    <option value="all">كل الدرجات</option>
+                    <option value="متفق عليه">متفق عليه</option>
+                    <option value="صحيح">صحيح</option>
+                    <option value="حسن">حسن</option>
+                    <option value="ضعيف">ضعيف / موقوف</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="results-count" id="resultsCount">الرجاء رفع ملف الإكسيل لتفعيل البحث الذكي...</div>
+        <div class="hadith-list" id="hadithList"></div>
+
+    </div>
+
+    <script>
+        let hadithDatabase = [];
+
+        // تنظيف الكلمات لتخطي فروق الهمزات والتشكيل أثناء البحث
+        function normalizeArabic(text) {
+            if (!text) return "";
+            return text.toString()
+                .replace(/[\u064B-\u065F]/g, "")
+                .replace(/[أإآ]/g, "ا")
+                .replace(/ة/g, "ه")
+                .replace(/ى/g, "ي")
+                .trim();
+        }
+
+        // معالجة وقراءة ملف Excel ديناميكياً
+        function handleExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // اختيار ورقة العمل الأولى (أحاديث المنتقى)
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                // تحويل الورقة إلى مصفوفة JSON برمجية
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                // هندسة الخانات ومطابقتها مع ترويسات ملفك الحقيقي
+                hadithDatabase = jsonData.map((row, index) => ({
+                    id: row['رقم الحديث'] || index + 1,
+                    text: row['طرف الحديث'] ? row['طرف الحديث'].toString().trim() : "",
+                    rawi: row['اسم الصحابي الراوي'] ? row['اسم الصحابي الراوي'].toString().trim() : "غير مذكور",
+                    takhrij: row['تخريج الحديث'] ? row['تخريج الحديث'].toString().trim() : "غير متوفر",
+                    degree: row['درجة الحديث'] ? row['درجة الحديث'].toString().trim() : "غير محدد"
+                })).filter(h => h.text !== "" && !h.text.includes("طرف الحديث")); // تنظيف السطور الإضافية
+
+                // تحديث الواجهات والعدادات فوراً
+                updateStats();
+                render();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function updateStats() {
+            document.getElementById('totalCount').textContent = hadithDatabase.length;
+            document.getElementById('muttafaqCount').textContent = hadithDatabase.filter(h => h.degree.includes('متفق')).length;
+            document.getElementById('sahihCount').textContent = hadithDatabase.filter(h => h.degree === 'صحيح').length;
+            document.getElementById('hassanCount').textContent = hadithDatabase.filter(h => h.degree.includes('حسن')).length;
+            document.getElementById('daifCount').textContent = hadithDatabase.filter(h => h.degree.includes('ضعيف') || h.degree.includes('موقوف')).length;
+        }
+
+        function getDegreeClass(degree) {
+            if (degree.includes('متفق')) return 'deg-muttafaq';
+            if (degree.includes('صحيح')) return 'deg-sahih';
+            if (degree.includes('حسن')) return 'deg-hassan';
+            return 'deg-daif';
+        }
+
+        function render() {
+            const query = normalizeArabic(document.getElementById('searchInput').value);
+            const filterValue = document.getElementById('degreeFilter').value;
+
+            const filtered = hadithDatabase.filter(h => {
+                const matchesSearch = normalizeArabic(h.text).includes(query) || normalizeArabic(h.rawi).includes(query);
+                let matchesFilter = (filterValue === 'all') || 
+                                (filterValue === 'ضعيف' && (h.degree.includes('ضعيف') || h.degree.includes('موقوف'))) ||
+                                (h.degree.includes(filterValue));
+                return matchesSearch && matchesFilter;
+            });
+
+            document.getElementById('resultsCount').textContent = `تم تحميل وقراءة الملف بنجاح! عثرنا على ${filtered.length} حديثاً مطابقاً للبحث الحالي.`;
+
+            if(filtered.length === 0) {
+                document.getElementById('hadithList').innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted)">لم نجد نتائج مطابقة لبحثك في ملف الإكسيل الحركي.</div>`;
+                return;
+            }
+
+            document.getElementById('hadithList').innerHTML = filtered.map(h => `
+                <div class="hadith-card">
+                    <div class="hadith-header">
+                        <span class="hadith-number">الرقم الترتيبي: ${h.id}</span>
+                        <span class="hadith-degree ${getDegreeClass(h.degree)}">${h.degree}</span>
+                    </div>
+                    <div class="hadith-text">${h.text}</div>
+                    <div class="hadith-meta-row">
+                        <div class="meta-item"><strong>الصحابي الراوي:</strong> ${h.rawi}</div>
+                        <div class="meta-item"><strong>التخريج والمراجع:</strong> ${h.takhrij}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', render);
+        document.getElementById('degreeFilter').addEventListener('change', render);
+    </script>
+</body>
+</html>
